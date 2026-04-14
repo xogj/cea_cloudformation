@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'IAM Resources for the application'
+
+Resources:
+  MyIAMRole:
+    Type: 'AWS::IAM::User' 
+    Properties: 
+     UserName: 'JeisonUser'
+     ManagedPolicyArns: 
+      - 'arn:aws:iam::aws:policy/AdministratorAccess'
+
