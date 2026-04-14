@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'IAM Resources for the application'
-
+#IAM Roles and Policies for the application 
 Resources:
   MyIAMRole:
     Type: 'AWS::IAM::User' 
@@ -8,4 +8,47 @@ Resources:
      UserName: 'JeisonUser'
      ManagedPolicyArns: 
       - 'arn:aws:iam::aws:policy/AdministratorAccess'
+# My IAM Group 
+  MyIAMGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: 'JeisonGroup'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+# Arrache User to Group 
+  MyIAMUserToGroup:
+    Type: 'AWS::IAM::UserToGroupAddition'
+    Properties:
+      GroupName: !Ref MyIAMGroup
+      Users:
+        - !Ref MyIAMRole
+# IAM Role for EC2 instances 
+  MyEC2Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'JeisonEC2Role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/PowerUserAccess'
 
+# S3 Custom Policy 
+  MyIAMPolicy: 
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: 'CustomPolicy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: "Allow"
+            Action: 
+             - "s3:GetObject"
+            Resource: "*"
+            Roles:
+              - !Ref MyEC2Role
+              
