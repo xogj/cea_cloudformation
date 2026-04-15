@@ -36,7 +36,6 @@ Resources:
             Action: "sts:AssumeRole"
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/PowerUserAccess'
-
 # S3 Custom Policy 
   MyIAMPolicy: 
     Type: 'AWS::IAM::Policy'
@@ -49,6 +48,6 @@ Resources:
             Action: 
              - "s3:GetObject"
             Resource: "*"
-            Roles:
-              - !Ref MyEC2Role
+      Roles:
+        - !Ref MyEC2Role
               
