@@ -2,10 +2,28 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "CloudFormation template to create an S3 Bucket for static website hosting"
 
 Resources:
-  MyyS3Bucket:
+  MyS3Bucket:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: "my-static-website-bucket"
       WebsiteConfiguration:
         IndexDocument: "index.html"
-  
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  BucketPolicy: 
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref MyS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "PublicReadGetObject"
+            Effect: "Allow"
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${MyS3Bucket}/*"
+            
