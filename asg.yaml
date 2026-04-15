@@ -125,21 +125,7 @@ Resources:
       Tags:
         - Key: Name
           Value: MyALBSecurityGroup
-# Security Group for Web Server
-  WebserverSecurtiyGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: Security group for Web Server
-      VpcId: !Ref MyVPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Name
-          Value: WebserverSecurtiyGroup
-  # Web Server /ALB  Security Group 
+ # Web Server /ALB  Security Group 
   WebserverSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -150,3 +136,47 @@ Resources:
           FromPort: 80
           ToPort: 80 
           CidrIp: '0.0.0.0/0'
+# Launch Configuration
+  MyLaunchConfiguration:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      ImageId: ami-0c55b159cbfafe1f0
+      InstanceType: t2.micro
+# AutoScaling Group 
+  MyAutoScalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      LaunchConfigurationName: !Ref MyLaunchConfiguration
+      MinSize: '1'
+      MaxSize: '3'
+      DesiredCapacity: '2'
+      VPCZoneIdentifier:
+        - !Ref AppPrivateSubnet1A
+        - !Ref AppPrivateSubnet2B
+
+#CPU Alarm 
+  HighCPUAlarm: 
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: 'Alarm when CPU exceeds 70#'
+      MetricName: 'CPUUtilization'
+      Namespace: 'AWS/ECS'
+      Statistic: 'Average'
+      Period: '300'
+      EvaluationPeriods: '1'
+      Threshold: '70'
+      ComparisonOperator: 'GreaterThanThreshold'
+      Dimensions:
+        - Name: 'AutoScalingGroupName'
+          Value: !Ref MyAutoScalingGroup
+      AlarmActions: 
+        - !Ref ScaleOutPolicy
+# Scale Out Policy 
+  ScaleOutPolicy:
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties: 
+      AutoScalingGroupName: !Ref MyAutoScalingGroup
+      PolicyType: 'SimpleScaling'
+      ScalingAdjustment: '1'
+      Cooldown: '300'
+      AdjustmentType: 'ChangeInCapacity'
